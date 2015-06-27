@@ -1,4 +1,9 @@
-from flask import Flask, jsonify
+from flask import (Flask, 
+                    jsonify, 
+                    abort, 
+                    make_response,
+                    request
+                    )
 #from flask_restful import Resource, Api
 from random import randint
 
@@ -17,6 +22,11 @@ facts = [
     }
 ]
 
+@app.errorhandler(404)
+def not_found(error):
+    return make_response(jsonify({'error': 'Not found'}), 404)
+
+#GET
 @app.route('/facts', methods=['GET'])
 def get_facts():
     return jsonify({'facts': facts})
@@ -35,6 +45,17 @@ def get_random():
     fact = [fact for fact in facts if fact['id'] == fact_id]
     return jsonify({'fact': fact[0]})
 
+#POST
+@app.route('/facts', methods=['POST'])
+def create_fact():
+    if not request.json or not 'fact' in request.json:
+        abort(400)
+    fact = {
+        'id': len(facts) + 1,
+        'fact': request.json['fact']
+    }
+    facts.append(fact)
+    return jsonify({'fact': fact}), 201
 
 if __name__ == '__main__':
     app.run(debug = True)
