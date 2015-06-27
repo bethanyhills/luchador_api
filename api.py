@@ -29,11 +29,11 @@ def get_fact(fact_id):
         abort(404)
     return jsonify({'fact': fact[0]})
 
-# @app.route('facts/random', methods=['GETS'])
-# def get_random(self):
-#         fact_id = randint(0, len(facts))
-#         return {fact_id: fact[fact_id]}
-
+@app.route('/facts/random', methods=['GET'])
+def get_random():
+    fact_id = randint(1, len(facts))
+    fact = [fact for fact in facts if fact['id'] == fact_id]
+    return jsonify({'fact': fact[0]})
 
 
 if __name__ == '__main__':
