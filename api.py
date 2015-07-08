@@ -4,7 +4,6 @@ from flask import (Flask,
                     make_response,
                     request
                     )
-#from flask_restful import Resource, Api
 from random import randint
 
 app = Flask(__name__)
@@ -52,10 +51,11 @@ def create_fact():
         abort(400)
     fact = {
         'id': len(facts) + 1,
-        'fact': request.json['fact']
+        'fact': request.json.get('fact', '')
     }
     facts.append(fact)
     return jsonify({'fact': fact}), 201
 
 if __name__ == '__main__':
     app.run(debug = True)
+
