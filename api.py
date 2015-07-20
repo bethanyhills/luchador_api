@@ -56,6 +56,21 @@ def create_fact():
     facts.append(fact)
     return jsonify({'fact': fact}), 201
 
+#PUT
+# @app.route('/facts/<int:fact_id>', methods=['PUT'])
+# def update_fact(fact_id):
+#     fact = [fact for fact in facts if fact['id'] == fact_id]
+#     if len(fact) == 0:
+#         abort(404)
+#     if not request.json:
+#         abort(400)
+#     if 'fact' in request.json and type(request.json['fact']) is not unicode:
+#         abort(400)
+    
+#     fact[0]['fact'] = request.json.get('fact', fact[0]['fact'])
+#     return jsonify({'task': task[0]})
+
+
 if __name__ == '__main__':
     app.run(debug = True)
 
