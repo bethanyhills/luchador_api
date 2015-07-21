@@ -4,10 +4,27 @@ from flask import (Flask,
                     make_response,
                     request
                     )
+from flask.ext.sqlalchemy import SQLAlchemy
+from flask.ext.heroku import Heroku
 from random import randint
 
 app = Flask(__name__)
-#api = Api(app)
+heroku = Heroku(app)
+db = SQLAlchemy(app)
+
+
+# Create our database model
+class Fact(db.Model):
+    __tablename__ = "facts"
+    id = db.Column(db.Integer, primary_key=True)
+    fact = db.Column(db.String(120), unique=True)
+
+    def __init__(self, fact):
+        self.fact = fact
+
+    def __repr__(self):
+        return '<Fact %r>' % self.fact
+
 
 
 facts = [
@@ -49,11 +66,16 @@ def get_random():
 def create_fact():
     if not request.json or not 'fact' in request.json:
         abort(400)
-    fact = {
-        'id': len(facts) + 1,
-        'fact': request.json.get('fact', '')
-    }
-    facts.append(fact)
+
+    if not db.session.query(Fact).filter(Fact.fact == fact).count():
+        x = Fact(fact)
+        db.session.add(x)
+        db.session.commit()
+    # fact = {
+    #     'id': len(facts) + 1,
+    #     'fact': request.json.get('fact', '')
+    # }
+    # facts.append(fact)
     return jsonify({'fact': fact}), 201
 
 #PUT
