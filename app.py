@@ -9,13 +9,13 @@ from flask.ext.heroku import Heroku
 from random import randint
 
 app = Flask(__name__)
-heroku = Heroku(app)
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
+# heroku = Heroku(app)
 db = SQLAlchemy(app)
 
 
 # Create our database model
 class Fact(db.Model):
-    __tablename__ = "facts"
     id = db.Column(db.Integer, primary_key=True)
     fact = db.Column(db.String(120), unique=True)
 
@@ -27,16 +27,16 @@ class Fact(db.Model):
 
 
 
-facts = [
-    {
-        'id': 1,
-        'fact' : "Luchadors wrestle because they wish to be hugged"
-    },
-    {
-        'id': 2,
-        'fact': "Luchadors wear masks because they are too handsome"
-    }
-]
+# facts = [
+#     {
+#         'id': 1,
+#         'fact' : "Luchadors wrestle because they wish to be hugged"
+#     },
+#     {
+#         'id': 2,
+#         'fact': "Luchadors wear masks because they are too handsome"
+#     }
+# ]
 
 @app.errorhandler(404)
 def not_found(error):
