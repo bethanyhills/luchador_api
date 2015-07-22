@@ -45,6 +45,8 @@ def get_facts():
     all_facts = Fact.query.all()
     if len(all_facts) > 0:
         return jsonify(facts=[x.serialize() for x in all_facts])
+    else:
+        return make_response(jsonify({'error': 'Not facts exist'}), 404)
 
 
 @app.route('/facts/<int:fact_id>', methods=['GET'])
@@ -70,11 +72,13 @@ def create_fact():
         abort(400)
 
     post_request = Fact.query.filter_by(fact=request.json.get('fact')).first()
+    #if the fact doesn't already exits
     if not post_request:
         x = Fact(fact=request.json.get('fact'))
         db.session.add(x)
         db.session.commit()
         return jsonify({'id': x.id, 'fact': x.fact}), 201
+    #else tell the user the fact already exists
     else:
         return make_response(jsonify({'error': 'That fact already exists'}), 404)
 
@@ -96,16 +100,16 @@ def update_fact(fact_id):
     else:
         return make_response(jsonify({'error': 'That fact doesnt exist'}), 404)
 
-#PUT
+#DELETE
 @app.route('/facts/<int:fact_id>', methods=['DELETE'])
 def delete_fact(fact_id):
-    #if the fact exists, update it
+    #if the fact exists, delete it
     x = Fact.query.get(fact_id)
     if x:
         db.session.delete(x)
         db.session.commit()
         return make_response(jsonify({'Success': 'fact deleted'}), 200)
-    #else create the fact
+    #else tell the user that fact doesn't exist
     else:
         return make_response(jsonify({'error': 'That fact doesnt exist'}), 404)
 
