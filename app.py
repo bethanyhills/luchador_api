@@ -79,18 +79,22 @@ def create_fact():
         return make_response(jsonify({'error': 'That fact already exists'}), 404)
 
 #PUT
-# @app.route('/facts/<int:fact_id>', methods=['PUT'])
-# def update_fact(fact_id):
-#     fact = [fact for fact in facts if fact['id'] == fact_id]
-#     if len(fact) == 0:
-#         abort(404)
-#     if not request.json:
-#         abort(400)
-#     if 'fact' in request.json and type(request.json['fact']) is not unicode:
-#         abort(400)
-    
-#     fact[0]['fact'] = request.json.get('fact', fact[0]['fact'])
-#     return jsonify({'task': task[0]})
+@app.route('/facts/<int:fact_id>', methods=['PUT'])
+def update_fact(fact_id):
+    if len(request.json.get('fact')) == 0:
+        abort(404)
+    if not request.json:
+        abort(400)
+    #if the fact exists, update it
+    x = Fact.query.get(fact_id)
+    if x:
+        x.fact = request.json.get('fact')
+        db.session.add(x)
+        db.session.commit()
+        return jsonify({'id': x.id, 'fact': x.fact})
+    #else create the fact
+    else:
+        return make_response(jsonify({'error': 'That fact doesnt exist'}), 404)
 
 
 if __name__ == '__main__':
