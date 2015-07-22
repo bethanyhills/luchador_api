@@ -6,17 +6,18 @@ from flask import (Flask,
                     request
                     )
 from flask.ext.sqlalchemy import SQLAlchemy
-from flask.ext.heroku import Heroku
+#from flask.ext.heroku import Heroku
 from random import randint
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
 # heroku = Heroku(app)
 db = SQLAlchemy(app)
 
 
 # Create our database model
 class Fact(db.Model):
+    __tablename__ = 'facts'
     id = db.Column(db.Integer, primary_key=True)
     fact = db.Column(db.String(120), unique=True)
 
@@ -26,18 +27,13 @@ class Fact(db.Model):
     def __repr__(self):
         return '<Fact %r>' % self.fact
 
+    def serialize(self):
+        return {
+            'id': self.id,
+            'fact': self.fact
+        }
 
 
-# facts = [
-#     {
-#         'id': 1,
-#         'fact' : "Luchadors wrestle because they wish to be hugged"
-#     },
-#     {
-#         'id': 2,
-#         'fact': "Luchadors wear masks because they are too handsome"
-#     }
-# ]
 
 @app.errorhandler(404)
 def not_found(error):
@@ -46,21 +42,26 @@ def not_found(error):
 #GET
 @app.route('/facts', methods=['GET'])
 def get_facts():
-    return jsonify({'facts': facts})
+    all_facts = Fact.query.all()
+    if len(all_facts) > 0:
+        return jsonify(facts=[x.serialize() for x in all_facts])
 
 
 @app.route('/facts/<int:fact_id>', methods=['GET'])
 def get_fact(fact_id):
-    fact = [fact for fact in facts if fact['id'] == fact_id]
-    if len(fact) == 0:
+    x = Fact.query.get(fact_id)
+    if not x:
         abort(404)
-    return jsonify({'fact': fact[0]})
+    return jsonify({'id': x.id, 'fact': x.fact})
 
 @app.route('/facts/random', methods=['GET'])
 def get_random():
-    fact_id = randint(1, len(facts))
-    fact = [fact for fact in facts if fact['id'] == fact_id]
-    return jsonify({'fact': fact[0]})
+    all_facts = Fact.query.all()
+    fact_id = randint(1, len(all_facts))
+    x = Fact.query.get(fact_id)
+    if not x:
+        abort(404)
+    return jsonify({'id': x.id, 'fact': x.fact})
 
 #POST
 @app.route('/facts', methods=['POST'])
@@ -68,16 +69,14 @@ def create_fact():
     if not request.json or not 'fact' in request.json:
         abort(400)
 
-    if not db.session.query(Fact).filter(Fact.fact == fact).count():
-        x = Fact(fact)
+    post_request = Fact.query.filter_by(fact=request.json.get('fact')).first()
+    if not post_request:
+        x = Fact(fact=request.json.get('fact'))
         db.session.add(x)
         db.session.commit()
-    # fact = {
-    #     'id': len(facts) + 1,
-    #     'fact': request.json.get('fact', '')
-    # }
-    # facts.append(fact)
-    return jsonify({'fact': fact}), 201
+        return jsonify({'id': x.id, 'fact': x.fact}), 201
+    else:
+        return make_response(jsonify({'error': 'That fact already exists'}), 404)
 
 #PUT
 # @app.route('/facts/<int:fact_id>', methods=['PUT'])
