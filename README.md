@@ -1,4 +1,7 @@
 # luchador_api
+A simple API of Luchador facts built in Flask + postgres db. 
+
+
 Data Structure:
 
 {
