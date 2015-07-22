@@ -96,6 +96,20 @@ def update_fact(fact_id):
     else:
         return make_response(jsonify({'error': 'That fact doesnt exist'}), 404)
 
+#PUT
+@app.route('/facts/<int:fact_id>', methods=['DELETE'])
+def delete_fact(fact_id):
+    #if the fact exists, update it
+    x = Fact.query.get(fact_id)
+    if x:
+        db.session.delete(x)
+        db.session.commit()
+        return make_response(jsonify({'Success': 'fact deleted'}), 200)
+    #else create the fact
+    else:
+        return make_response(jsonify({'error': 'That fact doesnt exist'}), 404)
+
+
 
 if __name__ == '__main__':
     app.run(debug = True)
