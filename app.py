@@ -6,6 +6,7 @@ from flask import (Flask,
                     request
                     )
 from flask.ext.sqlalchemy import SQLAlchemy
+from flask.ext.httpauth import HTTPBasicAuth
 #from flask.ext.heroku import Heroku
 from random import randint
 
@@ -13,6 +14,18 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
 # heroku = Heroku(app)
 db = SQLAlchemy(app)
+auth = HTTPBasicAuth()
+
+
+@auth.get_password
+def get_password(username):
+    if username == 'beth':
+        return 'password1'
+    return None
+
+@auth.error_handler
+def unauthorized():
+    return make_response(jsonify({'error': 'Unauthorized access'}), 401)
 
 
 # Create our database model
@@ -32,7 +45,6 @@ class Fact(db.Model):
             'id': self.id,
             'fact': self.fact
         }
-
 
 
 @app.errorhandler(404)
@@ -67,6 +79,7 @@ def get_random():
 
 #POST
 @app.route('/facts', methods=['POST'])
+@auth.login_required
 def create_fact():
     if not request.json or not 'fact' in request.json:
         abort(400)
@@ -84,6 +97,7 @@ def create_fact():
 
 #PUT
 @app.route('/facts/<int:fact_id>', methods=['PUT'])
+@auth.login_required
 def update_fact(fact_id):
     if len(request.json.get('fact')) == 0:
         abort(404)
@@ -102,6 +116,7 @@ def update_fact(fact_id):
 
 #DELETE
 @app.route('/facts/<int:fact_id>', methods=['DELETE'])
+@auth.login_required
 def delete_fact(fact_id):
     #if the fact exists, delete it
     x = Fact.query.get(fact_id)
