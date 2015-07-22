@@ -3,7 +3,8 @@ from flask import (Flask,
                     jsonify, 
                     abort, 
                     make_response,
-                    request
+                    request,
+                    url_for
                     )
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.httpauth import HTTPBasicAuth
@@ -43,8 +44,10 @@ class Fact(db.Model):
     def serialize(self):
         return {
             'id': self.id,
-            'fact': self.fact
+            'fact': self.fact,
+            'uri': url_for('get_fact', fact_id=self.id, _external=True)
         }
+    
 
 
 @app.errorhandler(404)
