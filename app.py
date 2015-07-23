@@ -9,10 +9,11 @@ from flask import (Flask,
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.httpauth import HTTPBasicAuth
 from random import randint
+import uuid
 
 app = Flask(__name__)
-#app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
+#app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
 db = SQLAlchemy(app)
 auth = HTTPBasicAuth()
 
@@ -46,7 +47,7 @@ class User(db.Model):
 
     def __init__(self, username):
         self.username = username
-        self.password = 'password2'
+        self.password = str(uuid.uuid4())
 
     def __repr__(self):
         return '<Name: {}, Password: {}, ID: {}>'.format(self.username, self.password, self.id)
