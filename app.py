@@ -8,25 +8,14 @@ from flask import (Flask,
                     )
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.httpauth import HTTPBasicAuth
-#from flask.ext.heroku import Heroku
 from random import randint
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
-# heroku = Heroku(app)
+#app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
 db = SQLAlchemy(app)
 auth = HTTPBasicAuth()
 
-
-@auth.get_password
-def get_password(username):
-    if username == 'beth':
-        return 'password1'
-    return None
-
-@auth.error_handler
-def unauthorized():
-    return make_response(jsonify({'error': 'Unauthorized access'}), 401)
 
 
 # Create our database model
@@ -47,8 +36,31 @@ class Fact(db.Model):
             'fact': self.fact,
             'uri': url_for('get_fact', fact_id=self.id, _external=True)
         }
-    
+  
+# Create our user model
+class User(db.Model):
+    __tablename__ = 'users'
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(120), unique=True)
+    password = db.Column(db.String(120))
 
+    def __init__(self, username):
+        self.username = username
+        self.password = 'password2'
+
+    def __repr__(self):
+        return '<Name: {}, Password: {}, ID: {}>'.format(self.username, self.password, self.id)
+
+
+@auth.get_password
+def get_password(User):
+    if self.username:
+        return self.password
+    return None
+
+@auth.error_handler
+def unauthorized():
+    return make_response(jsonify({'error': 'Unauthorized access'}), 401)
 
 @app.errorhandler(404)
 def not_found(error):
