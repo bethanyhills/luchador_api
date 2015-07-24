@@ -49,7 +49,8 @@ http://www.luchadorapi.com/facts/ + fact_id
 Return a random fact:
 http://www.luchadorapi.com/facts/random
 
-HTTPBasicAuth credentials necessary for the below:
+HTTPBasicAuth credentials necessary for the below.
+Email beth0851@gmail.com for access.
 
 --------POST----------
 
