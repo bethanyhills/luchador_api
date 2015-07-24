@@ -54,9 +54,10 @@ class User(db.Model):
 
 
 @auth.get_password
-def get_password(User):
-    if self.username:
-        return self.password
+def get_password(username):
+    user = User.query.filter_by(username=username).first()
+    if user:
+        return user.password
     return None
 
 @auth.error_handler
